@@ -141,11 +141,19 @@ export default class ByteInput extends React.Component {
   }
 
   onChange (evt) {
-    this.props.onChange({
-      target: {
-        value: clean(evt.target.value),
-      },
-    })
+    const value = this.props.value
+    const newValue = clean(evt.target.value)
+
+    // `MasketInput` calls the `onChange` handler on every key press,
+    // even if the key is not in `/[0-9a-f]/i`. This results in unnecessary
+    // state updates of the parent component.
+    if (value !== newValue) {
+      this.props.onChange({
+        target: {
+          value: clean(evt.target.value),
+        },
+      })
+    }
   }
 
   onCopy (evt) {
