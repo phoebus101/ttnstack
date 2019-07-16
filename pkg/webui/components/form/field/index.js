@@ -87,6 +87,23 @@ class FormField extends React.Component {
     this.context.unregisterField(name)
   }
 
+  sanitizeValue (currentValue) {
+    const { name } = this.props
+    const { initialValues } = this.context
+
+    const initialValue = getIn(initialValues, name)
+    const initialEmpty = isValueEmpty(initialValue)
+    const currentEmpty = isValueEmpty(currentValue)
+
+    // reset field value to the initial value or `undefined` if the current value
+    // of the field is empty.
+    if (initialEmpty && currentEmpty && currentValue !== initialValue) {
+      return initialValue
+    }
+
+    return currentValue
+  }
+
   extractValue (value) {
     let newValue = value
     if (typeof value === 'object' && 'target' in value) {
@@ -94,8 +111,10 @@ class FormField extends React.Component {
       if ('type' in target && target.type === 'checkbox') {
         newValue = target.checked
       } else if ('value' in target) {
-        newValue = target.value
+        newValue = this.sanitizeValue(target.value)
       }
+    } else {
+      newValue = this.sanitizeValue(value)
     }
 
     return newValue
