@@ -94,6 +94,7 @@ export default class GatewayAdd extends React.Component {
     const initialValues = {
       ids: {
         gateway_id: undefined,
+        eui: undefined,
       },
       enforce_duty_cycle: true,
       gateway_server_address: config.gs.enabled
