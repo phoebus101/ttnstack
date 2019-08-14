@@ -38,7 +38,7 @@ func (console *Console) Logout(c echo.Context) error {
 	})
 
 	ctx := c.Request().Context()
-	if peer := console.GetPeer(ctx, ttnpb.PeerInfo_ACCESS, nil); peer != nil {
+	if peer := console.GetPeer(ctx, ttnpb.ClusterRole_ACCESS, nil); peer != nil {
 		if cc := peer.Conn(); cc != nil {
 			if res, err := ttnpb.NewEntityAccessClient(cc).AuthInfo(ctx, ttnpb.Empty, creds); err == nil {
 				if tokenInfo := res.GetOAuthAccessToken(); tokenInfo != nil {

@@ -98,8 +98,8 @@ func TestEnumMarshalers(t *testing.T) {
 	vals = append(vals, grants)
 
 	var peerInfoRoles []fmt.Stringer
-	for i := range PeerInfo_Role_name {
-		peerInfoRoles = append(peerInfoRoles, PeerInfo_Role(i))
+	for i := range ClusterRole_name {
+		peerInfoRoles = append(peerInfoRoles, ClusterRole(i))
 	}
 	vals = append(vals, peerInfoRoles)
 

@@ -923,7 +923,7 @@ func (ns *NetworkServer) newDevAddr(context.Context, *ttnpb.EndDevice) types.Dev
 
 func (ns *NetworkServer) sendJoinRequest(ctx context.Context, ids ttnpb.EndDeviceIdentifiers, req *ttnpb.JoinRequest) (*ttnpb.JoinResponse, error) {
 	logger := log.FromContext(ctx)
-	if js := ns.GetPeer(ctx, ttnpb.PeerInfo_JOIN_SERVER, ids); js != nil {
+	if js := ns.GetPeer(ctx, ttnpb.ClusterRole_JOIN_SERVER, ids); js != nil {
 		resp, err := ttnpb.NewNsJsClient(js.Conn()).HandleJoin(ctx, req, ns.WithClusterAuth())
 		if err == nil {
 			logger.Debug("Join-request accepted by cluster-local Join Server")
@@ -1076,6 +1076,36 @@ func (ns *NetworkServer) handleJoinRequest(ctx context.Context, up *ttnpb.Uplink
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	js := ns.GetPeer(ctx, ttnpb.ClusterRole_JOIN_SERVER, dev.EndDeviceIdentifiers)
+	if js == nil {
+		logger.Debug("Join Server peer not found")
+		return errJoinServerNotFound
+	}
+
+	logger.Debug("Send join-request to Join Server")
+	resp, err := ttnpb.NewNsJsClient(js.Conn()).HandleJoin(ctx, req, ns.WithClusterAuth())
+	if err != nil {
+		logger.WithError(err).Warn("Join Server failed to handle join-request")
+		return err
+	}
+	logger.Debug("Join-accept received from Join Server")
+
+	ctx = events.ContextWithCorrelationID(ctx, resp.CorrelationIDs...)
+	keys := resp.SessionKeys
+	if !req.DownlinkSettings.OptNeg {
+		keys.NwkSEncKey = keys.FNwkSIntKey
+		keys.SNwkSIntKey = keys.FNwkSIntKey
+	}
+	macState.QueuedJoinAccept = &ttnpb.MACState_JoinAccept{
+		Keys:    keys,
+		Payload: resp.RawPayload,
+		Request: *req,
+	}
+	macState.RxWindowsAvailable = true
+
+>>>>>>> 6a519f155... api: Move Role out of PeerInfo
 	events.Publish(evtForwardJoinRequest(ctx, dev.EndDeviceIdentifiers, nil))
 	registerForwardJoinRequest(ctx, up)
 
