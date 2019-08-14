@@ -106,7 +106,6 @@ func (is *IdentityServer) setClusterCollaborator(ctx context.Context, req *ttnpb
 	} else {
 		events.Publish(evtDeleteClusterCollaborator(ctx, ttnpb.CombineIdentifiers(req.ClusterIdentifiers, req.Collaborator), nil))
 	}
-	is.invalidateCachedMembershipsForAccount(ctx, &req.Collaborator.OrganizationOrUserIdentifiers)
 	return ttnpb.Empty, nil
 }
 

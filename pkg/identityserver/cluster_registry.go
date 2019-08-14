@@ -25,7 +25,6 @@ import (
 	"go.thethings.network/lorawan-stack/pkg/identityserver/blacklist"
 	"go.thethings.network/lorawan-stack/pkg/identityserver/store"
 	"go.thethings.network/lorawan-stack/pkg/ttnpb"
-	"go.thethings.network/lorawan-stack/pkg/unique"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
@@ -106,7 +105,6 @@ func (is *IdentityServer) createCluster(ctx context.Context, req *ttnpb.CreateCl
 	cls.Secret = secret // Return the unhashed secret, in case it was generated.
 
 	events.Publish(evtCreateCluster(ctx, req.ClusterIdentifiers, nil))
-	is.invalidateCachedMembershipsForAccount(ctx, &req.Collaborator)
 
 	return cls, nil
 }
@@ -144,33 +142,30 @@ func (is *IdentityServer) getCluster(ctx context.Context, req *ttnpb.GetClusterR
 
 func (is *IdentityServer) listClusters(ctx context.Context, req *ttnpb.ListClustersRequest) (clss *ttnpb.Clusters, err error) {
 	req.FieldMask.Paths = cleanFieldMaskPaths(ttnpb.ClusterFieldPathsNested, req.FieldMask.Paths, getPaths, nil)
-	var clsRights map[string]*ttnpb.Rights
+	var includeIndirect bool
 	if req.Collaborator == nil {
-		callerRights, _, err := is.getRights(ctx)
+		authInfo, err := is.authInfo(ctx)
 		if err != nil {
 			return nil, err
 		}
-		clsRights = make(map[string]*ttnpb.Rights, len(callerRights))
-		for ids, rights := range callerRights {
-			if ids.EntityType() == "cluster" {
-				clsRights[unique.ID(ctx, ids)] = rights
-			}
-		}
-		if len(clsRights) == 0 {
+		collaborator := authInfo.GetOrganizationOrUserIdentifiers()
+		if collaborator == nil {
 			return &ttnpb.Clusters{}, nil
 		}
+		req.Collaborator = collaborator
+		includeIndirect = true
 	}
 	if usrIDs := req.Collaborator.GetUserIDs(); usrIDs != nil {
-		if err = rights.RequireUser(ctx, *usrIDs, ttnpb.RIGHT_USER_CLUSTERS_LIST); err != nil {
+		if err = rights.RequireUser(ctx, *usrIDs, ttnpb.RIGHT_USER_CLIENTS_LIST); err != nil {
 			return nil, err
 		}
 	} else if orgIDs := req.Collaborator.GetOrganizationIDs(); orgIDs != nil {
-		if err = rights.RequireOrganization(ctx, *orgIDs, ttnpb.RIGHT_ORGANIZATION_CLUSTERS_LIST); err != nil {
+		if err = rights.RequireOrganization(ctx, *orgIDs, ttnpb.RIGHT_ORGANIZATION_CLIENTS_LIST); err != nil {
 			return nil, err
 		}
 	}
 	var total uint64
-	ctx = store.WithPagination(ctx, req.Limit, req.Page, &total)
+	paginateCtx := store.WithPagination(ctx, req.Limit, req.Page, &total)
 	defer func() {
 		if err == nil {
 			setTotalHeader(ctx, total)
@@ -178,33 +173,25 @@ func (is *IdentityServer) listClusters(ctx context.Context, req *ttnpb.ListClust
 	}()
 	clss = &ttnpb.Clusters{}
 	err = is.withDatabase(ctx, func(db *gorm.DB) error {
-		if clsRights == nil {
-			rights, err := store.GetMembershipStore(db).FindMemberRights(ctx, req.Collaborator, "cluster")
-			if err != nil {
-				return err
-			}
-			clsRights = make(map[string]*ttnpb.Rights, len(rights))
-			for ids, rights := range rights {
-				clsRights[unique.ID(ctx, ids)] = rights
-			}
+		ids, err := is.getMembershipStore(ctx, db).FindMemberships(paginateCtx, req.Collaborator, "cluster", includeIndirect)
+		if err != nil {
+			return err
 		}
-		if len(clsRights) == 0 {
+		if len(ids) == 0 {
 			return nil
 		}
-		clsIDs := make([]*ttnpb.ClusterIdentifiers, 0, len(clsRights))
-		for uid := range clsRights {
-			clsID, err := unique.ToClusterID(uid)
-			if err != nil {
-				continue
+		clsIDs := make([]*ttnpb.ClusterIdentifiers, 0, len(ids))
+		for _, id := range ids {
+			if clsID := id.EntityIdentifiers().GetClusterIDs(); clsID != nil {
+				clsIDs = append(clsIDs, clsID)
 			}
-			clsIDs = append(clsIDs, &clsID)
 		}
 		clss.Clusters, err = store.GetClusterStore(db).FindClusters(ctx, clsIDs, &req.FieldMask)
 		if err != nil {
 			return err
 		}
 		for i, cls := range clss.Clusters {
-			if rights.RequireCluster(ctx, cls.ClusterIdentifiers, ttnpb.RIGHT_CLUSTER_ALL) != nil {
+			if rights.RequireCluster(ctx, cls.ClusterIdentifiers, ttnpb.RIGHT_CLIENT_ALL) != nil {
 				clss.Clusters[i] = cls.PublicSafe()
 			}
 		}
