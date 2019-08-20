@@ -15,12 +15,10 @@
 import React, { Component } from 'react'
 import * as Yup from 'yup'
 import bind from 'autobind-decorator'
-import { defineMessages } from 'react-intl'
 
 import sharedMessages from '../../../lib/shared-messages'
 import PropTypes from '../../../lib/prop-types'
 import { id as collaboratorIdRegexp } from '../../lib/regexp'
-import { RIGHT_ALL } from '../../lib/rights'
 
 import Form from '../../../components/form'
 import Input from '../../../components/input'
@@ -31,7 +29,6 @@ import Message from '../../../lib/components/message'
 import toast from '../../../components/toast'
 import ModalButton from '../../../components/button/modal-button'
 import RightsGroup from '../../components/rights-group'
-import Notification from '../../../components/notification'
 
 const validationSchema = Yup.object().shape({
   collaborator_id: Yup.string()
@@ -39,10 +36,6 @@ const validationSchema = Yup.object().shape({
     .required(sharedMessages.validateRequired),
   collaborator_type: Yup.string().required(sharedMessages.validateRequired),
   rights: Yup.array().min(1, sharedMessages.validateRights),
-})
-
-const m = defineMessages({
-  cannotModifyRightAll: 'This user possesses universal admin rights that cannot be modified.',
 })
 
 @bind
@@ -152,8 +145,6 @@ export default class CollaboratorForm extends Component {
 
     const error = passedError || submitError
 
-    const hasRightAll = Boolean(collaborator && collaborator.rights.includes(RIGHT_ALL))
-
     return (
       <Form
         horizontal
@@ -182,7 +173,6 @@ export default class CollaboratorForm extends Component {
           <Radio label={sharedMessages.user} value="user" />
           <Radio label={sharedMessages.organization} value="organization" />
         </Form.Field>
-        {hasRightAll && <Notification small info={m.cannotModifyRightAll} />}
         <Form.Field
           name="rights"
           title={sharedMessages.rights}
@@ -191,14 +181,13 @@ export default class CollaboratorForm extends Component {
           component={RightsGroup}
           rights={rights}
           universalRight={universalRights[0]}
-          disabled={hasRightAll}
         />
         <SubmitBar>
           <Form.Submit
             component={SubmitButton}
             message={update ? sharedMessages.saveChanges : sharedMessages.collaboratorAdd}
           />
-          {update && !hasRightAll && (
+          {update && (
             <ModalButton
               type="button"
               icon="delete"
