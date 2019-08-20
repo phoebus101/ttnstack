@@ -86,6 +86,7 @@ class Checkbox extends React.PureComponent {
   render() {
     const {
       className,
+      children,
       name,
       label,
       disabled,
@@ -131,7 +132,7 @@ class Checkbox extends React.PureComponent {
           />
           <span className={style.checkmark} />
         </span>
-        {label && <Message className={style.label} content={label} />}
+        <Message content={label} className={style.label} /> {children}
       </label>
     )
   }
@@ -139,7 +140,7 @@ class Checkbox extends React.PureComponent {
 
 Checkbox.propTypes = {
   className: PropTypes.string,
-  label: PropTypes.message,
+  label: PropTypes.oneOfType([PropTypes.message, PropTypes.node]),
   name: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
   checked: PropTypes.bool,
