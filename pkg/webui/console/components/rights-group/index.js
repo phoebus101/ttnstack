@@ -22,15 +22,17 @@ import { RIGHT_ALL } from '../../lib/rights'
 
 import Checkbox from '../../../components/checkbox'
 import Notification from '../../../components/notification'
+import Message from '../../../lib/components/message'
 
 import style from './rights-group.styl'
 
 const m = defineMessages({
   selectAll: 'Select All',
   outOfOwnScopeRights:
-    'This entity possesses rights that are out of your scope of granted rights. These rights cannot be altered.',
+    'This entity possesses rights that are out of your scope of granted rights. These rights can only be revoked.',
   outOfOwnScopeRightsStrict:
     'This entity possesses rights that are out of your scope of granted rights. Modifying is hence prohibited.',
+  revocableOnly: 'revocable only',
 })
 
 const computeState = function(values, rights, universalRight) {
@@ -50,41 +52,50 @@ const computeState = function(values, rights, universalRight) {
 
 @bind
 class RightsGroup extends React.Component {
-  state = {}
+  state = {
+    hasOutOfOwnScopeRights: undefined,
+  }
 
-  static getDerivedStateFromProps(props) {
-    if ('value' in props) {
-      const { value, rights: grantableRights, universalRight: grantableUniversalRight } = props
-      let universalRight = grantableUniversalRight
-      const allGrantableRights = [...grantableRights, ...grantableUniversalRight]
+  static getDerivedStateFromProps(props, state) {
+    const { value, rights: grantableRights, universalRight: grantableUniversalRight } = props
+    let { outOfOwnScopeRights, hasOutOfOwnScopeRights, hasOutOfOwnScopeUniversalRight } = state
+    const universalRight = grantableUniversalRight || value.find(right => right.endsWith('_ALL'))
+    const allGrantableRights = [...grantableRights, ...grantableUniversalRight]
 
-      // Identify given rights that are out of the scope of the current user
-      const outOfOwnScopeRights = value.filter(function(right) {
-        if (!allGrantableRights.includes(right) && right !== RIGHT_ALL) {
-          if (right.endsWith('_ALL')) {
-            universalRight = right
-          }
-          return true
-        }
-        return false
-      })
+    // If the entity has more rights than user can set himself, these rights
+    // will be present in the value prop, but not in the rights prop. Hence,
+    // we need to extract these additional rights initially to be able to
+    // display them persistently, even when they get unchecked
+    if (hasOutOfOwnScopeRights === undefined) {
+      // Filter out rights that the entity has but may not be granted by the
+      // user
+      outOfOwnScopeRights = value.filter(
+        right => right !== RIGHT_ALL && !allGrantableRights.includes(right),
+      )
 
-      // Compose rights list
-      const rights = [...outOfOwnScopeRights, ...grantableRights]
-
-      const { allSelected, indeterminate } = computeState(value, rights, universalRight)
-
-      return {
-        allSelected,
-        indeterminate,
-        outOfOwnScopeRights,
-        rights,
-        universalRight,
-        value,
-      }
+      // Examine the result and also store whether universal rights are present
+      hasOutOfOwnScopeRights = outOfOwnScopeRights.length !== 0
+      // Store whether out of scope universal rights are present
+      hasOutOfOwnScopeUniversalRight =
+        outOfOwnScopeRights.filter(right => right.endsWith('_ALL')).length !== 0
+      // Remove universal rights from the list
+      outOfOwnScopeRights = outOfOwnScopeRights.filter(right => !right.endsWith('_ALL'))
     }
 
-    return null
+    // Compose rights list
+    const rights = [...outOfOwnScopeRights, ...grantableRights]
+    const { allSelected, indeterminate } = computeState(value, rights, universalRight)
+
+    return {
+      allSelected,
+      indeterminate,
+      outOfOwnScopeRights,
+      hasOutOfOwnScopeRights,
+      hasOutOfOwnScopeUniversalRight,
+      rights,
+      universalRight,
+      value,
+    }
   }
 
   async handleChangeAll(event) {
@@ -129,6 +140,8 @@ class RightsGroup extends React.Component {
     const {
       indeterminate,
       outOfOwnScopeRights,
+      hasOutOfOwnScopeRights,
+      hasOutOfOwnScopeUniversalRights,
       value,
       allSelected,
       rights,
@@ -140,25 +153,24 @@ class RightsGroup extends React.Component {
         className={style.rightLabel}
         key={right}
         name={right}
-        label={{ id: `enum:${right}` }}
         disabled={outOfOwnScopeRights.includes(right)}
-      />
+        label={{ id: `enum:${right}` }}
+      >
+        {outOfOwnScopeRights.includes(right) && (
+          <Message className={style.revoke} content={m.revocableOnly} />
+        )}
+      </Checkbox>
     ))
 
-    const hasRightAll = Boolean(value.includes(RIGHT_ALL))
-    const hasOutOfOwnScopeRights = Boolean(outOfOwnScopeRights.length)
     const allDisabled =
-      disabled || outOfOwnScopeRights.includes(universalRight) || (strict && hasOutOfOwnScopeRights)
+      disabled || (strict && hasOutOfOwnScopeRights) || hasOutOfOwnScopeUniversalRights
 
     // Marshal rights to key/value for checkbox group
-    const rightsValues = rights.reduce(
-      function(acc, right) {
-        acc[right] = allSelected || value.includes(right)
+    const rightsValues = rights.reduce(function(acc, right) {
+      acc[right] = allSelected || value.includes(right)
 
-        return acc
-      },
-      { [RIGHT_ALL]: hasRightAll },
-    )
+      return acc
+    }, {})
 
     return (
       <div className={className}>
@@ -173,7 +185,11 @@ class RightsGroup extends React.Component {
           indeterminate={indeterminate}
           value={allSelected}
           disabled={allDisabled}
-        />
+        >
+          {hasOutOfOwnScopeUniversalRights && (
+            <Message className={style.revoke} content={m.revocableOnly} />
+          )}
+        </Checkbox>
         <Checkbox.Group
           className={style.group}
           horizontal
