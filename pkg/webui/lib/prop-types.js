@@ -54,6 +54,8 @@ PropTypes.link = PropTypes.shape({
   exact: PropTypes.bool,
 })
 
+// Entities and entity-related prop-types
+
 PropTypes.event = PropTypes.shape({
   name: PropTypes.string.isRequired,
   time: PropTypes.string.isRequired,
@@ -88,5 +90,13 @@ PropTypes.user = PropTypes.shape({
     user_id: PropTypes.string.isRequired,
   }).isRequired,
 })
+
+PropTypes.collaborator = PropTypes.shape({
+  isUser: PropTypes.boolean,
+  id: PropTypes.string.isRequired,
+  rights: PropTypes.rights,
+})
+
+PropTypes.rights = PropTypes.arrayOf(PropTypes.string)
 
 export default PropTypes

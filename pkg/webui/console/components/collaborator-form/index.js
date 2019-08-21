@@ -45,22 +45,25 @@ export default class CollaboratorForm extends Component {
     onSubmitFailure: () => null,
     onDelete: () => null,
     onDeleteSuccess: () => null,
-    oneleteFailure: () => null,
-    rights: [],
+    onDeleteFailure: () => null,
     universalRights: [],
+    error: '',
+    collaborator: undefined,
+    update: false,
   }
 
   static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-    onSubmitSuccess: PropTypes.func,
-    onSubmitFailure: PropTypes.func,
-    onDelete: PropTypes.func,
-    onDeleteSuccess: PropTypes.func,
-    onDeleteFailure: PropTypes.func,
-    rights: PropTypes.array,
-    initialFormValues: PropTypes.object,
+    collaborator: PropTypes.collaborator,
     error: PropTypes.error,
-    universalRights: PropTypes.array,
+    onDelete: PropTypes.func,
+    onDeleteFailure: PropTypes.func,
+    onDeleteSuccess: PropTypes.func,
+    onSubmit: PropTypes.func.isRequired,
+    onSubmitFailure: PropTypes.func,
+    onSubmitSuccess: PropTypes.func,
+    rights: PropTypes.rights.isRequired,
+    universalRights: PropTypes.rights,
+    update: PropTypes.bool,
   }
 
   state = {
@@ -96,7 +99,7 @@ export default class CollaboratorForm extends Component {
   }
 
   async handleDelete() {
-    const { collaborator, onDelete, onDeleteSuccess } = this.props
+    const { collaborator, onDelete, onDeleteSuccess, onDeleteFailure } = this.props
     const collaborator_type = collaborator.isUser ? 'user' : 'organization'
 
     const collaborator_ids = {
@@ -117,6 +120,7 @@ export default class CollaboratorForm extends Component {
       onDeleteSuccess()
     } catch (error) {
       this.setState({ error })
+      onDeleteFailure(error)
     }
   }
 

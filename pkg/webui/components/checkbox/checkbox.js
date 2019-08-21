@@ -139,29 +139,32 @@ class Checkbox extends React.PureComponent {
 }
 
 Checkbox.propTypes = {
+  autoFocus: PropTypes.bool,
+  children: PropTypes.node,
   className: PropTypes.string,
+  disabled: PropTypes.bool,
+  indeterminate: PropTypes.bool,
   label: PropTypes.oneOfType([PropTypes.message, PropTypes.node]),
   name: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
-  checked: PropTypes.bool,
-  disabled: PropTypes.bool,
-  readOnly: PropTypes.bool,
-  autoFocus: PropTypes.bool,
-  onChange: PropTypes.func,
   onBlur: PropTypes.func,
+  onChange: PropTypes.func,
   onFocus: PropTypes.func,
-  indeterminate: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  value: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
 }
 
 Checkbox.defaultProps = {
-  label: sharedMessages.enabled,
-  disabled: false,
-  readOnly: false,
   autoFocus: false,
-  onChange: () => null,
-  onBlur: () => null,
-  onFocus: () => null,
+  children: null,
+  className: undefined,
+  disabled: false,
   indeterminate: false,
+  label: sharedMessages.enabled,
+  onBlur: () => null,
+  onChange: () => null,
+  onFocus: () => null,
+  readOnly: false,
+  value: false,
 }
 
 export default Checkbox

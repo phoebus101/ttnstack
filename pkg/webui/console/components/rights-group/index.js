@@ -209,30 +209,35 @@ class RightsGroup extends React.Component {
 RightsGroup.propTypes = {
   /** The class to be added to the container */
   className: PropTypes.string,
+  /** A flag indicating whether the whole component should be disabled **/
+  disabled: PropTypes.bool,
   /** The name prop, used to connect to formik */
   name: PropTypes.string.isRequired,
-  /** The rights value */
-  value: PropTypes.array,
-  /** Change event hook */
-  onChange: PropTypes.func,
   /** Blur event hook */
   onBlur: PropTypes.func,
-  /** The universal right literal comprising all other rights */
-  universalRight: PropTypes.string,
+  /** Change event hook */
+  onChange: PropTypes.func,
   /** The list of rights options */
-  rights: PropTypes.arrayOf(PropTypes.string),
+  rights: PropTypes.rights,
   /** A flag identifying whether modifying rights is allowed when out of scope
    * rights are present. Can be used to prevent user error.
    */
   strict: PropTypes.bool,
+  /** The universal right literal comprising all other rights */
+  universalRight: PropTypes.string,
+  /** The rights value */
+  value: PropTypes.rights,
 }
 
 RightsGroup.defaultProps = {
-  onChange: () => null,
+  className: '',
+  disabled: false,
   onBlur: () => null,
+  onChange: () => null,
   rights: [],
-  value: [],
   strict: false,
+  universalRight: '',
+  value: [],
 }
 
 export default RightsGroup
