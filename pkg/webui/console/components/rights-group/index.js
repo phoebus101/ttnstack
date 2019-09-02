@@ -14,7 +14,7 @@
 
 import React from 'react'
 import bind from 'autobind-decorator'
-import { defineMessages } from 'react-intl'
+import { defineMessages, injectIntl } from 'react-intl'
 import classnames from 'classnames'
 
 import PropTypes from '../../../lib/prop-types'
@@ -29,11 +29,11 @@ import style from './rights-group.styl'
 const m = defineMessages({
   selectAll: 'Select All',
   outOfOwnScopeRights:
-    'This entity possesses rights that are out of your scope of granted rights. These rights can only be revoked.',
+    'This {entityType} has more rights than you have. These rights can only be revoked.',
   outOfOwnScopeRightsStrict:
-    'This entity possesses rights that are out of your scope of granted rights. Modifying is hence prohibited.',
+    'This {entityType} has more rights than you have. Modifying is hence prohibited.',
   outOfOwnScopeUniversalRight:
-    'This entity possesses a universal right that is outside of your scope of granted rights. Modifying the rights will revoke this right.',
+    "This {entityType} has a universal right that you don't have. Modifying the rights will revoke this right.",
   revocableOnly: 'revocable only',
 })
 
@@ -52,6 +52,7 @@ const computeState = function(values, rights, universalRight) {
   }
 }
 
+@injectIntl
 @bind
 class RightsGroup extends React.Component {
   state = {
@@ -136,7 +137,7 @@ class RightsGroup extends React.Component {
   }
 
   render() {
-    const { className, name, onBlur, disabled, strict } = this.props
+    const { className, name, onBlur, disabled, strict, intl, entityTypeMessage } = this.props
 
     const {
       indeterminate,
@@ -175,13 +176,23 @@ class RightsGroup extends React.Component {
       return acc
     }, {})
 
+    const collaboratorMessage = intl.formatMessage(entityTypeMessage).toLowerCase()
+
     return (
       <div className={className}>
         {hasOutOfOwnScopeUniversalRight && (
-          <Notification small info={m.outOfOwnScopeUniversalRight} />
+          <Notification
+            small
+            warning={m.outOfOwnScopeUniversalRight}
+            messageValues={{ entityType: collaboratorMessage }}
+          />
         )}
         {hasOutOfOwnScopeNonUniversalRights && (
-          <Notification small info={strict ? m.outOfOwnScopeRightsStrict : m.outOfOwnScopeRights} />
+          <Notification
+            small
+            warning={strict ? m.outOfOwnScopeRightsStrict : m.outOfOwnScopeRights}
+            messageValues={{ entityType: collaboratorMessage }}
+          />
         )}
         <Checkbox
           className={classnames(style.selectAll, style.rightLabel)}
@@ -217,6 +228,10 @@ RightsGroup.propTypes = {
   className: PropTypes.string,
   /** A flag indicating whether the whole component should be disabled **/
   disabled: PropTypes.bool,
+  /** The message depicting the type of entity this component is setting the
+   * rights for.
+   */
+  entityTypeMessage: PropTypes.message.isRequired,
   /** The name prop, used to connect to formik */
   name: PropTypes.string.isRequired,
   /** Blur event hook */

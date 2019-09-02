@@ -185,6 +185,7 @@ export default class CollaboratorForm extends Component {
           component={RightsGroup}
           rights={rights}
           universalRight={universalRights[0]}
+          entityTypeMessage={sharedMessages.collaborator}
         />
         <SubmitBar>
           <Form.Submit

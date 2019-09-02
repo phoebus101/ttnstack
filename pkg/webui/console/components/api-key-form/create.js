@@ -91,6 +91,7 @@ class CreateForm extends React.Component {
             component={RightsGroup}
             rights={rights}
             universalRight={universalRights[0]}
+            entityTypeMessage={sharedMessages.apiKey}
           />
           <SubmitBar>
             <FormSubmit component={SubmitButton} message={sharedMessages.createApiKey} />
