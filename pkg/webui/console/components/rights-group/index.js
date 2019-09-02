@@ -55,6 +55,50 @@ const computeState = function(values, rights, universalRight) {
 @injectIntl
 @bind
 class RightsGroup extends React.Component {
+  static propTypes = {
+    /** The class to be added to the container */
+    className: PropTypes.string,
+    /** A flag indicating whether the whole component should be disabled **/
+    disabled: PropTypes.bool,
+    /** The message depicting the type of entity this component is setting the
+     * rights for.
+     */
+    entityTypeMessage: PropTypes.message.isRequired,
+    /** The intl object provided by injectIntl of react-intl, used to translate
+     * messages
+     */
+    intl: PropTypes.shape({
+      formatMessage: PropTypes.func.isRequired,
+    }).isRequired,
+    /** The name prop, used to connect to formik */
+    name: PropTypes.string.isRequired,
+    /** Blur event hook */
+    onBlur: PropTypes.func,
+    /** Change event hook */
+    onChange: PropTypes.func,
+    /** The list of rights options */
+    rights: PropTypes.rights,
+    /** A flag identifying whether modifying rights is allowed when out of scope
+     * rights are present. Can be used to prevent user error.
+     */
+    strict: PropTypes.bool,
+    /** The universal right literal comprising all other rights */
+    universalRight: PropTypes.string,
+    /** The rights value */
+    value: PropTypes.rights,
+  }
+
+  static defaultProps = {
+    className: '',
+    disabled: false,
+    onBlur: () => null,
+    onChange: () => null,
+    rights: [],
+    strict: false,
+    universalRight: '',
+    value: [],
+  }
+
   state = {
     hasOutOfOwnScopeRights: undefined,
   }
@@ -221,44 +265,6 @@ class RightsGroup extends React.Component {
       </div>
     )
   }
-}
-
-RightsGroup.propTypes = {
-  /** The class to be added to the container */
-  className: PropTypes.string,
-  /** A flag indicating whether the whole component should be disabled **/
-  disabled: PropTypes.bool,
-  /** The message depicting the type of entity this component is setting the
-   * rights for.
-   */
-  entityTypeMessage: PropTypes.message.isRequired,
-  /** The name prop, used to connect to formik */
-  name: PropTypes.string.isRequired,
-  /** Blur event hook */
-  onBlur: PropTypes.func,
-  /** Change event hook */
-  onChange: PropTypes.func,
-  /** The list of rights options */
-  rights: PropTypes.rights,
-  /** A flag identifying whether modifying rights is allowed when out of scope
-   * rights are present. Can be used to prevent user error.
-   */
-  strict: PropTypes.bool,
-  /** The universal right literal comprising all other rights */
-  universalRight: PropTypes.string,
-  /** The rights value */
-  value: PropTypes.rights,
-}
-
-RightsGroup.defaultProps = {
-  className: '',
-  disabled: false,
-  onBlur: () => null,
-  onChange: () => null,
-  rights: [],
-  strict: false,
-  universalRight: '',
-  value: [],
 }
 
 export default RightsGroup
