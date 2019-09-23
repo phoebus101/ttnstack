@@ -35,7 +35,7 @@ import api from '../../api'
     appId: selectSelectedApplicationId(state),
   }),
   dispatch => ({
-    navigateToList: appId => dispatch(push(`/applications/${appId}/integrations`)),
+    navigateToList: appId => dispatch(push(`/applications/${appId}/integrations/webhooks`)),
   }),
 )
 @withBreadcrumb('apps.single.integrations.add', function(props) {

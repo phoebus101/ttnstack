@@ -70,7 +70,7 @@ const webhookEntitySelector = [
     const { appId, webhookId } = match.params
     return {
       getWebhook: () => dispatch(getWebhook(appId, webhookId, webhookEntitySelector)),
-      navigateToList: () => dispatch(replace(`/applications/${appId}/integrations`)),
+      navigateToList: () => dispatch(replace(`/applications/${appId}/integrations/webhooks`)),
     }
   },
 )
