@@ -56,6 +56,7 @@ export default class FileInput extends Component {
     maxSize: PropTypes.number,
     message: PropTypes.message,
     name: PropTypes.string.isRequired,
+    onBlur: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired,
     providedMessage: PropTypes.message,
     value: PropTypes.string,
@@ -85,7 +86,7 @@ export default class FileInput extends Component {
     const { maxSize } = this.props
     const { files } = event.target
 
-    if (files[0].size <= maxSize) {
+    if (files && files[0] && files[0].size <= maxSize) {
       this.setState({ filename: files[0].name, error: undefined })
       this.reader.readAsDataURL(files[0])
     } else {
@@ -103,7 +104,7 @@ export default class FileInput extends Component {
     const { onChange } = this.props
 
     this.setState({ filename: '', error: undefined })
-    onChange(undefined)
+    onChange('')
   }
 
   get statusMessage() {
@@ -145,6 +146,7 @@ export default class FileInput extends Component {
     return (
       <div className={style.container}>
         <Button
+          type="button"
           aria-controls="fileupload"
           onClick={this.handleChooseClick}
           disabled={disabled}
