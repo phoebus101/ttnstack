@@ -56,7 +56,6 @@ export default class FileInput extends Component {
     maxSize: PropTypes.number,
     message: PropTypes.message,
     name: PropTypes.string.isRequired,
-    onBlur: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired,
     providedMessage: PropTypes.message,
     value: PropTypes.string,
@@ -78,7 +77,7 @@ export default class FileInput extends Component {
     const { result: content } = event.target
 
     const data = dataTransform(content)
-    onChange(data)
+    onChange(data, true)
   }
 
   @bind
@@ -104,7 +103,7 @@ export default class FileInput extends Component {
     const { onChange } = this.props
 
     this.setState({ filename: '', error: undefined })
-    onChange('')
+    onChange('', true)
   }
 
   get statusMessage() {
