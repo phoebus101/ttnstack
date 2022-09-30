@@ -98,13 +98,13 @@ require (
 	github.com/kr/pretty v0.1.0
 	github.com/kyokomi/emoji v2.1.0+incompatible // indirect
 	// Do not upgrade Echo beyond v4.1.2 - see https://github.com/TheThingsNetwork/lorawan-stack/issues/977 .
-	github.com/labstack/echo/v4 v4.1.2
-	github.com/labstack/gommon v0.3.0
+	github.com/labstack/echo/v4 v4.9.0
+	github.com/labstack/gommon v0.3.1
 	github.com/lib/pq v1.2.0
 	github.com/magefile/mage v1.8.1-0.20190718165527-e1fda1a0ffba
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattn/go-ieproxy v0.0.0-20190805055040-f9202b1cfdeb // indirect
-	github.com/mattn/go-isatty v0.0.9
+	github.com/mattn/go-isatty v0.0.14
 	github.com/mattn/go-zglob v0.0.1 // indirect
 	github.com/mattn/goveralls v0.0.2
 	github.com/mdempsky/unconvert v0.0.0-20190325185700-2f5dc3378ed3
@@ -141,12 +141,11 @@ require (
 	go.thethings.network/lorawan-stack-legacy v0.0.0-20190118141410-68812c833a78
 	gocloud.dev v0.17.0
 	gocloud.dev/pubsub/natspubsub v0.16.0
-	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a // indirect
-	golang.org/x/net v0.0.0-20190909003024-a7b16738d86b
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20190910064555-bbd175535a8b // indirect
 	golang.org/x/tools v0.0.0-20190911022129-16c5e0f7d110
 	golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7
 	google.golang.org/api v0.10.0
